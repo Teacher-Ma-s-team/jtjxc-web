@@ -58,7 +58,7 @@
 									
 								</tr>
 							</thead>
-							<tbody>
+							<tbody id="tb">
 								<tr>
 									<td>1</td>
 									<td>商品1</td>
@@ -175,6 +175,8 @@
 				
 				$(function(){
 					$("#aaa").prop("selected","selected");
+
+					getInfoList();
 				})
 				
 				function btn_edit(id) {
@@ -182,6 +184,47 @@
 					$("#edit_a").tab('show')
 					
 					
+				}
+
+				function getInfoList(){
+					$.ajax({
+							url:"http://localhost:8888/jxc/info/all",
+							type:"get",
+							datatype:"json",
+							success:function(data){
+							
+								if(data.ret == 1)
+								{
+									//1.数据添加成功 回显数据
+									var infos = data.data;
+									//2.切换到显示的tab
+									//$("#show_a").tab("show");
+								
+									console.log(infos);
+									showInfoList(infos);
+									
+								}
+								
+							}
+								
+						});
+				}
+				// 渲染列表
+				function showInfoList(infos){
+					var tb = $("#tb");
+					tb.html("");
+					infos.forEach(function(info){
+						var str = "<tr>"+
+									"<td>"+info.iId+"</td>"+
+									"<td>"+info.tName+"</td>"+
+									"<td>"+info.pName+"</td>"+
+									"<td>"+info.iQuantity+"</td>"+
+									"<td>"+info.iNote+"</td>"+
+									"<td class='edit'><button class='btn btn-warning' onclick='btn_edit(1)'>编辑预警</button></td>"+
+									"<td class='delete'><button class='btn btn-danger' onclick='btn_delete(1)'>删除预警</button></td>"+
+								"</tr>";
+						tb.append(str);
+					})
 				}
 
 			</script>
