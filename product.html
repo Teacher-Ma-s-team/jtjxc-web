@@ -58,17 +58,8 @@
 									<th>删除</th>
 								</tr>
 							</thead>
-							<tbody>
-								<tr>
-									<td>1</td>
-									<td>哇哈哈</td>
-									<td>5元</td>
-									<td>饮料</td>
-									<td>哇哈哈！好喝！</td>
-									<td>辽宁区最受欢迎饮料</td>
-									<td class="edit"><button class="btn btn-warning" onclick="btn_edit(1)">编辑</button></td>
-									<td class="delete"><button class="btn btn-danger" onclick="btn_delete(1)">删除</button></td>
-								</tr>
+							<tbody id="tb">
+								
 								
 							</tbody>
 
@@ -80,19 +71,19 @@
 				<div id="add_content" class="tab-pane fade">
 
 
-					<form  id="edit_type_form">
+					<form  id="insert_product_form">
 						<div class="form-group">
 							<label for="exampleInputEmail1">名称</label>
-							<input type="text" class="form-control" id="exampleInputEmail1" placeholder="商品名称">
+							<input name="pName" type="text" class="form-control" id="exampleInputEmail1" placeholder="商品名称">
 						</div>
 						<div class="form-group">
 							<label for="jg">价格</label>
-							<input type="text" class="form-control" id="jg" placeholder="商品价格">
+							<input name="pPrice" type="text" class="form-control" id="jg" placeholder="商品价格">
 						</div>
 						
 						<div class="form-group">
 							<label for="leibie">类别</label>
-							<select class="form-control" name="tId">
+							<select id="insert_select" class="form-control" name="tId">
 							  <option value="1">酒水</option>
 							  <option value="2" selected="selected">僵尸</option>
 							
@@ -101,14 +92,14 @@
 						
 						<div class="form-group">
 							<label for="exampleInputPassword1">描述</label>
-							<input type="password" class="form-control" id="exampleInputPassword1" placeholder="商品描述">
+							<input name="pDes" type="text" class="form-control" id="exampleInputPassword1" placeholder="商品描述">
 						</div>
 
 						<div class="form-group">
 							<label for="beizhu">备注</label>
-							<textarea id="beizhu" class="form-control" rows="3" placeholder="商品备注"></textarea>
+							<textarea name="pNote" id="beizhu" class="form-control" rows="3" placeholder="商品备注"></textarea>
 						</div>
-						<input type="button" class="btn btn-success" value="商品添加"></input>
+						<input type="button" class="btn btn-success" value="商品添加" onclick="insertButton()"></input>
 						<input type="reset" class="btn btn-danger" value="重置"></input>
 					</form>
 					<!-- end-->
@@ -129,7 +120,7 @@
 						
 						<div class="form-group">
 							<label for="leibie">类别</label>
-							<select class="form-control">
+							<select id="edit_select" class="form-control">
 							  <option>1</option>
 							  <option>2</option>
 							  <option id="aaa">3</option>
@@ -159,6 +150,10 @@
 				
 				$(function(){
 					$("#aaa").prop("selected","selected");
+					// 商品列表
+					getProductList();
+					// 分类下拉框
+					getTypeList();
 				})
 				
 				function btn_edit(id) {
@@ -166,6 +161,138 @@
 					$("#edit_a").tab('show')
 					
 					
+				}
+				// 点击删除商品按钮
+				function btn_delete(pid){
+					var params = {
+						pid
+					}
+					if(confirm("是否确认删除该商品？")){
+						// 删除逻辑
+						$.ajax({
+							url:"http://localhost:8888/jxc/product/del",
+							type:"get",
+							datatype:"json",
+							data: params,
+							success:function(data){
+							
+								if(data.ret == 1)
+								{
+									//1.数据添加成功 回显数据
+									var products = data.data;
+									//2.切换到显示的tab
+									//$("#show_a").tab("show");
+								
+									showProductList(products);
+									
+								}
+								
+							}
+								
+						});
+					}
+				}
+				// 点击添加按钮
+				function insertButton(){
+					var params = $("#insert_product_form").serialize();
+					$.ajax({
+						url:"http://localhost:8888/jxc/product/insert",
+						type:"POST",
+						data:params,
+						datatype:"json",
+						success:function(data){
+						
+							if(data.ret == 1)
+							{
+								//1.数据添加成功 回显数据
+								var products = data.data;
+								//2.切换到显示的tab
+								$("#show_a").tab("show");
+								showProductList(products);
+							}
+							
+						}
+			
+					});
+				}
+				// 请求商品列表的数据
+				function getProductList(){
+					$.ajax({
+							url:"http://localhost:8888/jxc/product/show",
+							type:"get",
+							datatype:"json",
+							success:function(data){
+							
+								if(data.ret == 1)
+								{
+									//1.数据添加成功 回显数据
+									var products = data.data;
+									//2.切换到显示的tab
+									//$("#show_a").tab("show");
+								
+									showProductList(products);
+									
+								}
+								
+							}
+								
+						});
+				}
+				// 将商品列表渲染到页面
+				function showProductList(products){
+					var tb = $('#tb');
+					tb.html("");
+					products.forEach(function(product){
+						var str = "<tr>"+
+									"<td>"+product.pId+"</td>"+
+									"<td>"+product.pName+"</td>"+
+									"<td>"+product.pPrice+"元</td>"+
+									"<td>"+product.types.tName+"</td>"+
+									"<td>"+product.pDes+"</td>"+
+									"<td>"+product.pNote+"</td>"+
+									"<td class='edit'><button class='btn btn-warning' onclick='btn_edit("+product.pId+")'>编辑</button></td>"+
+									"<td class='delete'><button class='btn btn-danger' onclick='btn_delete("+product.pId+")'>删除</button></td>"+
+									"</tr>";
+						tb.append(str);
+					})
+
+				}
+
+				// 获取全部分类列表
+				function getTypeList(){
+					$.ajax({
+							url:"http://localhost:8888/jxc/types/show",
+							type:"get",
+							datatype:"json",
+							success:function(data){
+							
+								if(data.ret == 1)
+								{
+									//1.数据添加成功 回显数据
+									var types = data.data;
+									//2.切换到显示的tab
+									//$("#show_a").tab("show");
+								
+									showInsertAndEditSelect(types);
+									
+								}
+								
+							}
+								
+						});
+				}
+
+				// 将全部的分类数据渲染到下拉选择框中
+				function showInsertAndEditSelect(types){
+					var insert_select = $("#insert_select");
+					var edit_select = $("#edit_select");
+					insert_select.html("");
+					edit_select.html("");
+					types.forEach(function(type){
+						var str = "<option value='"+type.tId+"'>"+type.tName+"</option>";
+						insert_select.append(str);
+						edit_select.append(str);
+					})
 				}
 
 			</script>
