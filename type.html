@@ -92,21 +92,21 @@
 					
 
 
-					<form id="edit_type_form">
+					<form id="upfm">
 						<div class="form-group">
 							<label for="exampleInputEmail1">名称</label>
-							<input type="email" class="form-control" id="exampleInputEmail1" placeholder="类别名称">
+							<input type="text" name="tName" class="form-control" id="tName" placeholder="类别名称">
 						</div>
 						<div class="form-group">
 							<label for="exampleInputPassword1">描述</label>
-							<input type="password" class="form-control" id="exampleInputPassword1" placeholder="类别描述">
+							<input type="text" name="tDes" class="form-control" id="tDes" placeholder="类别描述">
 						</div>
 
 						<div class="form-group">
 							<label for="beizhu">备注</label>
-							<textarea id="beizhu" class="form-control" rows="3" placeholder="类别备注"></textarea>
+							<textarea id="tNote" name="tNote" class="form-control" rows="3" placeholder="类别备注"></textarea>
 						</div>
-						<input type="button" class="btn btn-success" value="修改分类"></input>
+						<input type="button" onclick="updateType()" class="btn btn-success" value="修改分类"></input>
 						<input type="reset" class="btn btn-danger" value="重置分类"></input>
 					</form>
 
@@ -179,6 +179,31 @@
 				}
 				
 				
+				function updateType(){
+					
+					var param = $("#upfm").serialize();
+					
+					$.ajax({
+						url:"http://localhost:8888/jxc/types/uptype",
+						type:"POST",
+						data:param,
+						datatype:"json",
+						success:function(data){
+						
+							if(data.ret == 1)
+							{
+								//1.数据添加成功 回显数据
+								var types = data.data;
+								//2.切换到显示的tab
+								$("#show_a").tab("show");
+								showTablebody(types);
+							}
+							
+						}
+							
+					});
+				}
+				
 				
 				function showTablebody(types){
 					//给我一个类别集合 我去显示
@@ -190,23 +215,60 @@
 					{
 						
 					  var tobj = types[index];
+					  
+					  var type = JSON.stringify(tobj);
 						
 					  var str = "<tr>"+
 								"<td>"+tobj.tId+"</td>"+
 								"<td>"+tobj.tName+"</td>"+
 								"<td>"+tobj.tDes+"</td>"+
 								"<td>"+tobj.tNote+"</td>"+
-								"<td class=''edit'><button class='btn btn-warning' onclick='btn_edit(1)'>编辑</button></td>"+
-								"<td class='delete'><button class='btn btn-danger' onclick='btn_delete(1)'>删除</button></td>"+
+								"<td class='edit'><button class='btn btn-warning' onclick='btn_edit("+type+")'>编辑</button></td>"+
+								"<td class='delete'><button class='btn btn-danger' onclick='btn_delete("+tobj.tId+")'>删除</button></td>"+
 								"</tr>";
 					  tb.append(str);
 					}
 				}
 				
-				// $(function(){
-				// 	$("#edit_a").tab("show");
-				// })
-		
+				function btn_edit(type) {
+				
+					$("#edit_a").tab('show');
+					
+					$("#tName").val(type.tName);
+					$("#tDes").val(type.tDes);
+					$("#tNote").val(type.tNote);
+					
+				}
+				
+				function btn_delete(tId) {
+					var params = {
+						tId: tId
+					};
+					
+					var bl = confirm("是否确定删除该分类?");
+					if(bl){
+						
+						$.ajax({
+							url:"http://localhost:8888/jxc/types/detype",
+							type:"get",
+							data:params,
+							datatype:"json",
+							success:function(data){
+							
+								if(data.ret == 1)
+								{
+									//1.数据删除成功 回显数据
+									var types = data.data;
+									//2.切换到显示的tab
+									$("#show_a").tab("show");
+									showTablebody(types);
+								}
+								
+							}
+								
+						});
+					}
+				}
 			</script>
 
 		</div>
