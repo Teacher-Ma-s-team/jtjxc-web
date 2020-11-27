@@ -19,17 +19,17 @@
 
 
 		</style>
-	<body>
-		<div class="container-fluid" style="margin-top: 20px;">
+	<body onload="showinsert()">
+		<div class="container-fluid" style="margin-top: 20px;" >
 
 			<ul class="nav nav-tabs">
 				<li style="box-sizing: initial;-webkit-box-sizing: initial;" class="active">
-					<a id="show_a" href="#show_content" data-toggle="tab">
+					<a id="show_a" href="#show_content" data-toggle="tab" >
 						查看入库
 					</a>
 				</li>
 				<li style="box-sizing: initial;-webkit-box-sizing: initial;">
-					<a id="add_a" href="#add_content" data-toggle="tab">
+					<a id="add_a" href="#add_content" data-toggle="tab" onclick="showlist()">
 						添加入库
 					</a>
 				</li>
@@ -58,16 +58,8 @@
 									
 								</tr>
 							</thead>
-							<tbody>
-								<tr>
-									<td>1</td>
-									<td>商品1</td>
-									<td>肉类</td>
-									<td>1000</td>
-									<td>2019-11-11</td>
-									<td class="edit"><button class="btn btn-warning" onclick="btn_edit(1)">编辑库存</button></td>
-									<td class="delete"><button class="btn btn-danger" onclick="btn_delete(1)">删除库存</button></td>
-								</tr>
+							<tbody id="tb1">
+
 							</tbody>
 
 						</table>
@@ -83,18 +75,14 @@
 						
 						<div class="form-group">
 							<label for="leibie">类别</label>
-							<select class="form-control">
-							  <option>1</option>
-							  <option>2</option>
-							  <option id="aaa">3</option>
-							  <option>4</option>
-							  <option>5</option>
+							<select class="form-control" id="typelist" onchange="selproid()">
+							  
 							</select>
 						</div>
 						
 						<div class="form-group">
 							<label for="leibie">商品</label>
-							<select class="form-control">
+							<select class="form-control" id="prolist" >
 							  <option>1</option>
 							  <option>2</option>
 							  <option id="xx">3</option>
@@ -107,16 +95,12 @@
 						
 						<div class="form-group">
 							<label for="exampleInputPassword1">数量</label>
-							<input type="password" class="form-control" id="exampleInputPassword1" placeholder="入库数量">
+							<input type="text" class="form-control" id="num" placeholder="入库数量">
 						</div>
 						
-						<div class="form-group">
-							<label for="beizhu">备注</label>
-							<textarea id="beizhu" class="form-control" rows="3" placeholder="入库备注"></textarea>
-						</div>
 
 						
-						<input type="button" class="btn btn-success" value="入库"></input>
+						<input type="button" id="addbtn" class="btn btn-success" value="入库" onclick="inserthorse()"></input>
 						<input type="reset" class="btn btn-danger" value="重置"></input>
 					</form>
 					<!-- end-->
@@ -128,42 +112,25 @@
 					
 					<div class="form-group">
 						<label for="rkid">编号</label>
-						<input type="password" class="form-control" id="rkid" >
+						<input type="text" class="form-control" id="rkid" >
 					</div>
 					<div class="form-group">
 						<label for="leibie">类别</label>
-						<select class="form-control">
-						  <option>1</option>
-						  <option>2</option>
-						  <option id="aaa">3</option>
-						  <option>4</option>
-						  <option>5</option>
-						</select>
+						<input type="text" class="form-control" id="type3" placeholder="商品类别">
 					</div>
 					
 					<div class="form-group">
 						<label for="leibie">商品</label>
-						<select class="form-control">
-						  <option>1</option>
-						  <option>2</option>
-						  <option id="xx">3</option>
-						  <option>4</option>
-						  <option>5</option>
-						</select>
+						<input type="text" class="form-control" id="pname3" placeholder="商品名称">
 					</div>
 					
 					
 					
 					<div class="form-group">
 						<label for="exampleInputPassword1">数量</label>
-						<input type="password" class="form-control" id="exampleInputPassword1" placeholder="入库数量">
+						<input type="text" class="form-control" id="num1" placeholder="入库数量">
 					</div>
-				<div class="form-group">
-					<label for="beizhu">备注</label>
-					<textarea id="beizhu" class="form-control" rows="3" placeholder="入库备注"></textarea>
-				</div>
-					
-					<input type="button" class="btn btn-success" value="编辑"></input>
+					<input type="button" class="btn btn-success" id="btn2" value="编辑" onclick="changed()"></input>
 					<input type="reset" class="btn btn-danger" value="重置"></input>
 				</form>
 					<!-- end-->
@@ -172,16 +139,198 @@
 
 
 			<script>
+				//alert($('#typelist option:selected').val())
+
+				function showlist(){				
+					var options=$("#typelist option:selected")
+				var options1=$("#prolist option:selected")	
+					$('#typelist').text("")								
+					$.ajax({
+						url:'http://localhost:8888/jxc/types/show',
+						type:'post',
+						dataType:'json',
+						success:function(data){
+							var typelist=""
+							for(var i=0;i<data.data.length;i++){
+							typelist+="<option>"+data.data[i].tId+"</option>"
+							}
+							$('#typelist').append(typelist)
+							
+
+
+						}
+					})
+					
+
+				}
+				function selproid(){
+
+					$('#prolist').text("")
+					var options=$("#typelist option:selected")
+				var options1=$("#prolist option:selected")
 				
-				$(function(){
-					$("#aaa").prop("selected","selected");
-				})
+					console.log(options.text());
+					var t1={tId:options.text()}
+					$.ajax({
+						url:'http://localhost:8888/jxc/types/show',
+						type:'post',
+						dataType:'json',
+						contentType:'application/json',
+						data:JSON.stringify(t1),
+						success:function(data){
+							console.log(data);
+
+							var prolist=""
+							for(var i=0;i<data.data.length;i++){
+							prolist+="<option>"+data.data[i].pName+"</option>"
+							}
+							$('#prolist').append(prolist)
+							
+
+
+						}
+					})
+				}
+				function inserthorse(){
+					$('#tb1').text("")
+					var options=$("#typelist option:selected")
+				var options1=$("#prolist option:selected")
+					var a=options.text()
+					var b=options1.text()
+					var c=$('#num').val()
+					console.log(c)
+					var inhourse={tId:a,pName:b,inhNumber:c}
+					$.ajax({
+						url:'http://localhost:8888/jxc//inhourse/save',
+						type:'post',
+						dataType:'json',
+						contentType:'application/json',
+						data:JSON.stringify(inhourse),
+						success:function(data){
+							console.log(data);
+							addendtable(data)
+							
+							$("#show_a").tab('show')
+
+							
+
+
+						}
+					})
+				}
+				function addendtable(data){
+					var res=""
+							for(var i=0;i<data.data.length;i++){
+								res+="<tr><td>"+data.data[i].inhId+"</td>"+
+									"<td>"+data.data[i].tId+"</td>"+
+									"<td>"+data.data[i].pName+"</td>"+
+									"<td>"+data.data[i].inhNumber+"</td>"+
+									"<td>"+data.data[i].intime+"</td>"+
+									"<td class='edit'><button class='btn btn-warning' onclick='btn_edit("+data.data[i].inhId+")'>编辑库存</button></td>"+
+									"<td class='delete'><button class='btn btn-danger' onclick='btn_delete("+data.data[i].inhId+")'>删除库存</button></td></tr>"
+							}
+							$('#tb1').append(res)
+
+				}
+				function showinsert(){
+					$.ajax({
+						url:'http://localhost:8888/jxc/inhourse/show',
+						type:'get',
+						dataType:'json',
+						success:function(data){
+							console.log(data);
+							addendtable(data)
+							
+							$("#show_a").tab('show')
+
+							
+
+
+						}
+					})
+				}
+				
+
 				
 				function btn_edit(id) {
+					console.log(id)
 
-					$("#edit_a").tab('show')
+					
+					$('#rkid').val(id)
+					var id={inhId:id}
+					$.ajax({
+						url:'http://localhost:8888/jxc/inhourse/showbyid',
+						type:'post',
+						dataType:'json',
+						data:JSON.stringify(id),
+						contentType:'application/json',
+						success:function(data){
+							console.log(data.data);
+							$('#type3').val(data.data[0].tId)
+							$('#pname3').val(data.data[0].pName)
+							$('#num1').val(data.data[0].inhNumber)
+							
+							$("#edit_a").tab('show')
+							
+
+							
+
+
+						}
+					})
 					
 					
+				}
+				function btn_delete(id){
+					$('#tb1').text("")
+					var id={inhId:id}
+					$.ajax({
+						url:'http://localhost:8888/jxc/inhourse/delhis',
+						type:'post',
+						dataType:'json',
+						data:JSON.stringify(id),
+						contentType:'application/json',
+						success:function(data){
+							alert('删除成功~~~~，数据已改变')
+							console.log(data);
+							addendtable(data)
+							
+							//$("#edit_a").tab('show')
+							
+
+							
+
+
+						}
+					})
+
+				}
+				function changed(){
+					$('#tb1').text("")
+					var a1=$('#rkid').val()
+					var b1=$('#type3').val()
+					var c1=$('#pname3').val()
+					var d1=$('#num1').val()
+					//console.log(c)
+					var inhourse={inhId:a1,tId:b1,pName:c1,inhNumber:d1}
+					$.ajax({
+						url:'http://localhost:8888/jxc/inhourse/changed',
+						type:'post',
+						dataType:'json',
+						contentType:'application/json',
+						data:JSON.stringify(inhourse),
+						success:function(data){
+							console.log(data);
+							addendtable(data)
+							
+							$("#show_a").tab('show')
+
+							
+
+
+						}
+					})
+
 				}
 
 			</script>
