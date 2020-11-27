@@ -78,12 +78,12 @@
 				<div id="add_content" class="tab-pane fade">
 
 
-					<form id="edit_type_form">
+					<form id="insert_info_form">
 						
 						
 						<div class="form-group">
 							<label for="leibie">类别</label>
-							<select class="form-control">
+							<select name="tId" id="insert_select_type" onchange="handleTypeSelect()" class="form-control">
 							  <option>1</option>
 							  <option>2</option>
 							  <option id="aaa">3</option>
@@ -94,12 +94,12 @@
 						
 						<div class="form-group">
 							<label for="leibie">商品</label>
-							<select class="form-control">
-							  <option>1</option>
+							<select name="pId" id="product_select" class="form-control">
+							  <!-- <option>1</option>
 							  <option>2</option>
 							  <option id="xx">3</option>
 							  <option>4</option>
-							  <option>5</option>
+							  <option>5</option> -->
 							</select>
 						</div>
 						
@@ -107,16 +107,16 @@
 						
 						<div class="form-group">
 							<label for="exampleInputPassword1">数量</label>
-							<input type="password" class="form-control" id="exampleInputPassword1" placeholder="预警数量">
+							<input name="iQuantity" type="text" class="form-control" id="exampleInputPassword1" placeholder="预警数量">
 						</div>
 						
 						<div class="form-group">
 							<label for="beizhu">备注</label>
-							<textarea id="beizhu" class="form-control" rows="3" placeholder="预警备注"></textarea>
+							<textarea name="iNote" id="beizhu" class="form-control" rows="3" placeholder="预警备注"></textarea>
 						</div>
 
 						
-						<input type="button" class="btn btn-success" value="添加"></input>
+						<input type="button" class="btn btn-success" onclick="handleInsertINfo()" value="添加"></input>
 						<input type="reset" class="btn btn-danger" value="重置"></input>
 					</form>
 					<!-- end-->
@@ -124,7 +124,7 @@
 				<div id="edit_content" class="tab-pane fade">
 
 
-					<form id="edit_type_form">
+					<form id="edit_info_form">
 					
 					<div class="form-group">
 						<label for="rkid">编号</label>
@@ -132,7 +132,7 @@
 					</div>
 					<div class="form-group">
 						<label for="leibie">类别</label>
-						<select class="form-control">
+						<select id="edit_select_type" class="form-control">
 						  <option>1</option>
 						  <option>2</option>
 						  <option id="aaa">3</option>
@@ -177,6 +177,7 @@
 					$("#aaa").prop("selected","selected");
 
 					getInfoList();
+					getTypeList();
 				})
 				
 				function btn_edit(id) {
@@ -220,11 +221,143 @@
 									"<td>"+info.pName+"</td>"+
 									"<td>"+info.iQuantity+"</td>"+
 									"<td>"+info.iNote+"</td>"+
-									"<td class='edit'><button class='btn btn-warning' onclick='btn_edit(1)'>编辑预警</button></td>"+
-									"<td class='delete'><button class='btn btn-danger' onclick='btn_delete(1)'>删除预警</button></td>"+
+									"<td class='edit'><button class='btn btn-warning' onclick='btn_edit("+info.iId+")'>编辑预警</button></td>"+
+									"<td class='delete'><button class='btn btn-danger' onclick='btn_delete("+info.iId+")'>删除预警</button></td>"+
 								"</tr>";
 						tb.append(str);
 					})
+				}
+
+				// 获取全部分类列表
+				function getTypeList(){
+					$.ajax({
+							url:"http://localhost:8888/jxc/types/show",
+							type:"get",
+							datatype:"json",
+							success:function(data){
+							
+								if(data.ret == 1)
+								{
+									//1.数据添加成功 回显数据
+									var types = data.data;
+									//2.切换到显示的tab
+									//$("#show_a").tab("show");
+								
+									showInsertAndEditSelect(types);
+									
+								}
+								
+							}
+								
+						});
+				}
+
+				// 将全部的分类数据渲染到下拉选择框中
+				function showInsertAndEditSelect(types){
+					var insert_select = $("#insert_select_type");
+					var edit_select = $("#edit_select_type");
+					insert_select.html("");
+					edit_select.html("");
+					types.forEach(function(type){
+						var str = "<option value='"+type.tId+"'>"+type.tName+"</option>";
+						insert_select.append(str);
+						edit_select.append(str);
+					})
+				}
+				// 用户选择不同的分类时触发的函数
+				function handleTypeSelect(){
+					var tId = $("#insert_select_type").val();
+					console.log(tId);
+					var params = {
+						tId:tId
+					}
+					$.ajax({
+							url:"http://localhost:8888/jxc/product/queryByTId",
+							type:"get",
+							datatype:"json",
+							data:params,
+							success:function(data){
+							
+								if(data.ret == 1)
+								{
+									//1.数据添加成功 回显数据
+									var products = data.data;
+									//2.切换到显示的tab
+									//$("#show_a").tab("show");
+								
+									showProductToSelect(products);
+									
+								}
+								
+							}
+								
+						});
+				}
+				// 将商品信息列表显示到select上
+				function showProductToSelect(products){
+					var productSelect = $("#product_select");
+					productSelect.html("");
+					products.forEach(function(product){
+						var str = "<option value='"+product.pId+"'>"+product.pName+"</option>";
+						productSelect.append(str);
+					})
+				}
+
+				// 用户点击添加预警信息按钮
+				function handleInsertINfo(){
+					var params = $("#insert_info_form").serialize();
+					//console.log(params);
+					$.ajax({
+							url:"http://localhost:8888/jxc/info/insert",
+							type:"post",
+							datatype:"json",
+							data:params,
+							success:function(data){
+							
+								if(data.ret == 1)
+								{
+									//1.数据添加成功 回显数据
+									var infos = data.data;
+									//2.切换到显示的tab
+									$("#show_a").tab("show");
+								
+									showInfoList(infos);
+									
+								}
+								
+							}
+								
+						});
+				}
+
+				// 点击删除按钮
+				function btn_delete(iId){
+					if(confirm("是否确认删除？")){
+						var params = {
+						iId:iId
+						}
+						$.ajax({
+								url:"http://localhost:8888/jxc/info/del",
+								type:"get",
+								datatype:"json",
+								data:params,
+								success:function(data){
+								
+									if(data.ret == 1)
+									{
+										//1.数据添加成功 回显数据
+										var infos = data.data;
+										//2.切换到显示的tab
+										//$("#show_a").tab("show");
+									
+										showInfoList(infos);
+										
+									}
+									
+								}
+									
+							});
+					}
 				}
 
 			</script>
