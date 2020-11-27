@@ -19,7 +19,7 @@
 
 
 		</style>
-	<body>
+	<body onload="userLoad()">
 		<div class="container-fluid" style="margin-top: 20px;">
 
 			<ul class="nav nav-tabs">
@@ -57,7 +57,8 @@
 									<th>删除</th>
 								</tr>
 							</thead>
-							<tbody>
+							<tbody id="us">
+							<!--
 								<tr>
 									<td>1</td>
 									<td>admin</td>
@@ -67,6 +68,7 @@
 									<td class="edit"><button class="btn btn-warning" onclick="btn_edit(1)">编辑用户</button></td>
 									<td class="delete"><button class="btn btn-danger" onclick="btn_delete(1)">删除用户</button></td>
 								</tr>
+								-->
 							</tbody>
 
 						</table>
@@ -77,54 +79,55 @@
 				<div id="add_content" class="tab-pane fade">
 
 
-					<form id="edit_type_form">
+					<form id="insert_type_form">
 						<div class="form-group">
 							<label for="yhm">用户名</label>
-							<input type="text" class="form-control" id="yhm" placeholder="登录账号">
+							<input name="uAccount" type="text" class="form-control" id="yhm" placeholder="登录账号">
 						</div>
 						
 						<div class="form-group">
 							<label for="mm">密码</label>
-							<input type="password" class="form-control" id="mm" placeholder="登录密码">
+							<input name="uPassword" type="password" class="form-control" id="mm" placeholder="登录密码">
 						</div>
 						
 						<div class="form-group">
 							<label for="姓名">姓名</label>
-							<input type="text" class="form-control" id="姓名" placeholder="员工姓名">
+							<input name="uName" type="text" class="form-control" id="姓名" placeholder="员工姓名">
 						</div>
+						
+						
 						
 						<div class="form-group">
-							<label class="checkbox-inline">
-							  <input type="checkbox" id="inlineCheckbox1" value="option1" checked="checked"> 男
-							</label>
-							<label class="checkbox-inline">
-							  <input type="checkbox" id="inlineCheckbox2" value="option2"> 女
-							</label>
+							<label for="leibie">性别</label>
+							<select name="usex" class="form-control">
+							  <option value="男">男</option>
+							  <option value="女">女</option>
+							</select>
 						</div>
-						
-						
 						
 						
 						
 						<div class="form-group">
 							<label for="leibie">角色</label>
-							<select class="form-control">
-							  <option>员工</option>
-							  <option>经理</option>
+							<select name="ujs" class="form-control">
+							  <option value="员工">员工</option>
+							  <option value="经理">经理</option>
 							</select>
 						</div>
 						
 						
 
 						
-						<input type="button" class="btn btn-success" value="添加"></input>
+						<input type="button" onclick="insertUser()" class="btn btn-success" value="添加"></input>
 						<input type="reset" class="btn btn-danger" value="重置"></input>
 					</form>
 					<!-- end-->
 				</div>
 				<div id="edit_content" class="tab-pane fade">
 
-<form id="edit_type_form">
+                <form id="edit_type_form">
+					<input id="uId" name="uId" hidden />
+						<!--
 						<div class="form-group">
 							<label for="yhm">用户名</label>
 							<input type="text" class="form-control" id="yhm" readonly="readonly" placeholder="登录账号">
@@ -148,7 +151,13 @@
 							  <input type="checkbox" id="inlineCheckbox2" value="option2"> 女
 							</label>
 						</div>
-						
+						<div class="form-group">
+							<label for="leibie">性别</label>
+							<select name="usex" class="form-control">
+							  <option value="男">男</option>
+							  <option value="女">女</option>
+							</select>
+						</div>
 						
 						
 						
@@ -161,10 +170,44 @@
 							</select>
 						</div>
 						
+						-->
+						<div class="form-group">
+							<label for="yhm">用户名</label>
+							<input name="uAccount" type="text" class="form-control" id="uAccount" placeholder="登录账号">
+						</div>
 						
+						<div class="form-group">
+							<label for="mm">密码</label>
+							<input name="uPassword" type="password" class="form-control" id="uPassword" placeholder="登录密码">
+						</div>
+						
+						<div class="form-group">
+							<label for="姓名">姓名</label>
+							<input name="uName" type="text" class="form-control" id="uName" placeholder="员工姓名">
+						</div>
+						
+						
+						
+						<div class="form-group">
+							<label for="leibie">性别</label>
+							<select id="usex" name="usex" class="form-control">
+							  <option value="男">男</option>
+							  <option value="女">女</option>
+							</select>
+						</div>
+						
+						
+						
+						<div class="form-group">
+							<label for="leibie">角色</label>
+							<select id="ujs" name="ujs" class="form-control">
+							  <option value="员工">员工</option>
+							  <option value="经理">经理</option>
+							</select>
+						</div>
 
 						
-						<input type="button" class="btn btn-success" value="添加"></input>
+						<input type="button" onclick="updateUser()" class="btn btn-success" value="编辑"></input>
 						<input type="reset" class="btn btn-danger" value="重置"></input>
 					</form>
 					<!-- end-->
@@ -174,17 +217,170 @@
 
 			<script>
 				
-				$(function(){
-					$("#aaa").prop("selected","selected");
-				})
+				function userLoad(){
+					$.ajax({
+							url:"http://localhost:8888/jxc/user/show",
+							type:"get",
+							datatype:"json",
+							success:function(data){
+							
+								if(data.ret == 1)
+								{
+									//1.数据添加成功 回显数据
+									var user = data.data;
+									//2.切换到显示的tab
+									//$("#show_a").tab("show");
+								
+									showTablebody(user);
+									
+								}
+								
+							}
+								
+						});
 				
-				function btn_edit(id) {
-
-					$("#edit_a").tab('show')
+				}
+				
+				// function saveUser(){
+				// 	
+				// 	var param = $("#edit_type_form").serialize();
+				// 	
+				// 	$.ajax({
+				// 		url:"http://localhost:8888/jxc/user/login",
+				// 		type:"POST",
+				// 		data:param,
+				// 		datatype:"json",
+				// 		success:function(data){
+				// 		
+				// 			if(data.ret == 1)
+				// 			{
+				// 				//1.数据添加成功 回显数据
+				// 				var user = data.data;
+				// 				//2.切换到显示的tab
+				// 				$("#show_a").tab("show");
+				// 				showTablebody(user);
+				// 			}
+				// 			
+				// 		}
+				// 			
+				// 	});
+				// }
+                function showTablebody(users){
+					//给我一个集合 我去显示
+					var us = $("#us");
 					
+					us.html("");
 					
+					for(var index = 0 ; index < users.length ; index++)
+					{
+						
+					  var uss = users[index];
+					var user=JSON.stringify(uss);
+					  var str = "<tr>"+
+								"<td>"+uss.uId+"</td>"+
+								"<td>"+uss.uAccount+"</td>"+
+								"<td>"+uss.uName+"</td>"+
+								"<td>"+uss.usex+"</td>"+
+								"<td>"+uss.ujs+"</td>"+
+								"<td class='edit'><a href='javascript:void(0)' onclick='btn_edit("+user+")'>编辑</button></td>"+
+								"<td class='delete'><button class='btn btn-danger' onclick='btn_delete("+uss.uId+")'>删除</button></td>"+
+								"</tr>";
+					  us.append(str);
+					}
+				}
+					function btn_edit(user){
+						console.log(user)
+						$("#edit_a").tab('show');
+						$("#uId").val(user.uId);
+						$("#uAccount").val(user.uAccount);
+						$("#uPassword").val(user.uPassword);
+						$("#uName").val(user.uName);
+						$("#usex").val(user.usex);
+						$("#ujs").val(user.ujs);
+						
+						//updateUser();
+					}
+					
+					function btn_delete(uId) {
+					var params = {
+						uId: uId
+					};
+					
+					var bl = confirm("是否确定删除该员工?");
+					if(bl){
+						
+						$.ajax({
+							url:"http://localhost:8888/jxc/user/deuser",
+							type:"get",
+							data:params,
+							datatype:"json",
+							success:function(data){
+							
+								if(data.ret == 1)
+								{
+									//1.数据删除成功 回显数据
+									var user = data.data;
+									//2.切换到显示的tab
+									$("#show_a").tab("show");
+									showTablebody(user);
+								}
+								
+							}
+								
+						});
+					}
+				}
+				
+				function insertUser(){
+					
+					var param = $("#insert_type_form").serialize();
+					alert(param);
+					$.ajax({
+						url:"http://localhost:8888/jxc/user/inuser",
+						type:"POST",
+						data:param,
+						datatype:"json",
+						success:function(data){
+						
+							if(data.ret == 1)
+							{
+								//1.数据添加成功 回显数据
+								var user = data.data;
+								//2.切换到显示的tab
+								$("#show_a").tab("show");
+								showTablebody(user);
+							}
+							
+						}
+							
+					});
 				}
 
+				function updateUser(){
+					
+					var param = $("#edit_type_form").serialize();
+					
+					$.ajax({
+						url:"http://localhost:8888/jxc/user/upuser",
+						type:"POST",
+						data:param,
+						datatype:"json",
+						success:function(data){
+						
+							if(data.ret == 1)
+							{
+								//1.数据添加成功 回显数据
+								var user = data.data;
+								//2.切换到显示的tab
+								$("#show_a").tab("show");
+								showTablebody(user);
+							}
+							
+						}
+							
+					});
+				}
+				
 			</script>
 
 		</div>
